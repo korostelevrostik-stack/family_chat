@@ -4,44 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="manifest" href="/manifest.json">
-  <title>Личные чаты</title>
+  <title>Мессенджер</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; }
     #app { width: 100%; max-width: 500px; height: 700px; background: #0f1419; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
     
-    /* Шапка */
     #header { background: #1f2b33; padding: 15px 20px; color: white; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2b3a45; }
     #header .back { background: none; border: none; color: #6b8c9e; font-size: 24px; cursor: pointer; padding: 0 8px; display: none; }
     #header .title { font-weight: 600; font-size: 17px; flex: 1; }
     #header .status { font-size: 13px; color: #6b8c9e; }
-    
-    /* Список контактов */
+    #header .menu { background: none; border: none; color: #6b8c9e; font-size: 20px; cursor: pointer; }
+
+    .screen { display: none; flex-direction: column; height: 100%; }
+    .screen.active { display: flex; }
+
+    #loginScreen { justify-content: center; padding: 30px 24px; background: #0f1419; }
+    #loginScreen h1 { color: white; font-size: 24px; text-align: center; margin-bottom: 20px; }
+    #loginScreen input { padding: 14px 18px; border-radius: 14px; border: none; background: #1f2b33; color: white; font-size: 16px; outline: none; margin-bottom: 10px; }
+    #loginScreen button { padding: 14px; border-radius: 14px; border: none; background: #2b5278; color: white; font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    #loginScreen .switch { color: #6b8c9e; text-align: center; margin-top: 12px; font-size: 14px; }
+    #loginScreen .switch span { color: #2b5278; font-weight: 600; cursor: pointer; }
+    .error { color: #ff6b6b; font-size: 14px; text-align: center; margin-top: 8px; }
+
     #contacts { flex: 1; padding: 12px 0; overflow-y: auto; }
     .contact { padding: 14px 20px; border-bottom: 1px solid #1f2b33; color: white; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.15s; }
     .contact:active { background: #1f2b33; }
-    .contact .avatar { width: 44px; height: 44px; border-radius: 50%; background: #2b5278; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: white; }
+    .contact .avatar { width: 44px; height: 44px; border-radius: 50%; background: #2b5278; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: white; position: relative; }
+    .contact .avatar .online { position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #0f1419; }
+    .contact .avatar .online.yes { background: #2b9b5e; }
+    .contact .avatar .online.no { background: #6b8c9e; }
     .contact .info { flex: 1; }
     .contact .info .name { font-weight: 500; font-size: 16px; }
+    .contact .info .login { font-size: 12px; color: #6b8c9e; }
     .contact .info .lastMsg { font-size: 13px; color: #6b8c9e; margin-top: 2px; }
-    
-    /* Окно чата (скрыто) */
-    #chatWindow { display: none; flex-direction: column; height: 100%; }
-    #messages { flex: 1; padding: 12px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+
+    #chatWindow .messages { flex: 1; padding: 12px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
     .msg { max-width: 80%; padding: 7px 12px; border-radius: 12px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
     .msg.me { align-self: flex-end; background: #2b5278; color: white; border-bottom-right-radius: 4px; }
     .msg.them { align-self: flex-start; background: #1f2b33; color: #e1e9f0; border-bottom-left-radius: 4px; }
     .msg .time { font-size: 10px; color: #6b8c9e; display: block; text-align: right; margin-top: 2px; }
-    
+
     #form { display: flex; gap: 8px; padding: 10px 16px; background: #1f2b33; border-top: 1px solid #2b3a45; }
     #input { flex: 1; padding: 10px 16px; border-radius: 24px; border: none; background: #2b3a45; color: white; font-size: 16px; outline: none; }
     #input::placeholder { color: #6b8c9e; }
     #btn { padding: 10px 18px; border-radius: 24px; border: none; background: #2b5278; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
-    
-    #login { padding: 30px 24px; display: flex; flex-direction: column; gap: 16px; justify-content: center; height: 100%; background: #0f1419; }
-    #login h1 { color: white; font-size: 24px; text-align: center; }
-    #login input { padding: 14px 18px; border-radius: 14px; border: none; background: #1f2b33; color: white; font-size: 16px; outline: none; }
-    #login button { padding: 14px; border-radius: 14px; border: none; background: #2b5278; color: white; font-size: 18px; font-weight: 600; cursor: pointer; }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -52,21 +60,28 @@
     <button class="back" id="backBtn">←</button>
     <div class="title" id="headerTitle">Контакты</div>
     <div class="status" id="headerStatus"></div>
+    <button class="menu" id="menuBtn">⚙️</button>
   </div>
 
-  <!-- Экран входа -->
-  <div id="login">
-    <h1>💬 Вход в чат</h1>
-    <input id="nameInput" placeholder="Введите ваше имя" />
-    <button id="joinBtn">Войти</button>
+  <!-- Экран входа/регистрации -->
+  <div id="loginScreen" class="screen active">
+    <h1 id="authTitle">💬 Вход</h1>
+    <input id="loginInput" placeholder="Логин (например, papa)" />
+    <input id="passInput" type="password" placeholder="Пароль" />
+    <input id="nameInput" placeholder="Отображаемое имя (например, Папа)" style="display: none;" />
+    <button id="authBtn">Войти</button>
+    <div class="switch" id="authSwitch">Нет аккаунта? <span>Зарегистрироваться</span></div>
+    <div class="error" id="authError"></div>
   </div>
 
   <!-- Список контактов -->
-  <div id="contacts" class="hidden"></div>
+  <div id="contactsScreen" class="screen">
+    <div id="contacts"></div>
+  </div>
 
   <!-- Окно чата -->
-  <div id="chatWindow">
-    <div id="messages"></div>
+  <div id="chatScreen" class="screen">
+    <div class="messages" id="messages"></div>
     <div id="form">
       <input id="input" placeholder="Сообщение..." />
       <button id="btn">➤</button>
@@ -77,125 +92,183 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
+  let myLogin = '';
   let myName = '';
-  let currentChat = '';
+  let currentChatLogin = '';
+  let isRegister = false;
   let allUsers = [];
 
-  const loginDiv = document.getElementById('login');
+  // DOM
+  const loginScreen = document.getElementById('loginScreen');
+  const contactsScreen = document.getElementById('contactsScreen');
+  const chatScreen = document.getElementById('chatScreen');
   const contactsDiv = document.getElementById('contacts');
-  const chatWindow = document.getElementById('chatWindow');
   const messagesDiv = document.getElementById('messages');
   const input = document.getElementById('input');
   const btn = document.getElementById('btn');
-  const nameInput = document.getElementById('nameInput');
-  const joinBtn = document.getElementById('joinBtn');
   const backBtn = document.getElementById('backBtn');
+  const menuBtn = document.getElementById('menuBtn');
   const headerTitle = document.getElementById('headerTitle');
   const headerStatus = document.getElementById('headerStatus');
 
-  // Вход
-  joinBtn.addEventListener('click', () => {
-    myName = nameInput.value.trim() || 'Аноним';
-    loginDiv.classList.add('hidden');
-    contactsDiv.classList.remove('hidden');
-    socket.emit('register', myName);
+  const loginInput = document.getElementById('loginInput');
+  const passInput = document.getElementById('passInput');
+  const nameInput = document.getElementById('nameInput');
+  const authBtn = document.getElementById('authBtn');
+  const authTitle = document.getElementById('authTitle');
+  const authError = document.getElementById('authError');
+  const authSwitch = document.getElementById('authSwitch');
+
+  // Переключение между входом и регистрацией
+  authSwitch.addEventListener('click', () => {
+    isRegister = !isRegister;
+    if (isRegister) {
+      authTitle.textContent = '📝 Регистрация';
+      authBtn.textContent = 'Зарегистрироваться';
+      authSwitch.innerHTML = 'Уже есть аккаунт? <span>Войти</span>';
+      nameInput.style.display = 'block';
+    } else {
+      authTitle.textContent = '💬 Вход';
+      authBtn.textContent = 'Войти';
+      authSwitch.innerHTML = 'Нет аккаунта? <span>Зарегистрироваться</span>';
+      nameInput.style.display = 'none';
+    }
+    authError.textContent = '';
+  });
+
+  // Авторизация
+  authBtn.addEventListener('click', () => {
+    const login = loginInput.value.trim();
+    const password = passInput.value.trim();
+    if (!login || !password) { authError.textContent = 'Заполните все поля!'; return; }
+
+    if (isRegister) {
+      const name = nameInput.value.trim() || login;
+      socket.emit('register', { login, password, name });
+    } else {
+      socket.emit('login', { login, password });
+    }
+  });
+
+  // Ответы сервера
+  socket.on('registerSuccess', (data) => {
+    myLogin = data.login;
+    myName = data.name;
+    enterApp();
+  });
+
+  socket.on('registerError', (msg) => { authError.textContent = msg; });
+
+  socket.on('loginSuccess', (data) => {
+    myLogin = data.login;
+    myName = data.name;
+    enterApp();
+  });
+
+  socket.on('loginError', (msg) => { authError.textContent = msg; });
+
+  function enterApp() {
+    loginScreen.classList.remove('active');
+    contactsScreen.classList.add('active');
     headerTitle.textContent = 'Контакты';
-  });
-
-  // Обновление списка пользователей
-  socket.on('userList', (users) => {
-    allUsers = users.filter(u => u !== myName);
-    renderContacts();
-  });
-
-  socket.on('userJoined', (name) => {
-    if (!allUsers.includes(name) && name !== myName) {
-      allUsers.push(name);
-      renderContacts();
-    }
-  });
-
-  socket.on('userLeft', (name) => {
-    allUsers = allUsers.filter(u => u !== name);
-    renderContacts();
-  });
-
-  // История сообщений
-  socket.on('history', ({ withUser, messages }) => {
-    if (withUser === currentChat) {
-      messagesDiv.innerHTML = '';
-      messages.forEach(msg => addMessage(msg.from, msg.text, msg.time));
-    }
-  });
-
-  // Новое личное сообщение
-  socket.on('newPrivateMessage', ({ from, text, time }) => {
-    if (currentChat === from || currentChat === myName) {
-      addMessage(from, text, time);
-    }
-    // Обновляем последнее сообщение в контактах
-    renderContacts();
-  });
-
-  function addMessage(from, text, time) {
-    const div = document.createElement('div');
-    div.className = `msg ${from === myName ? 'me' : 'them'}`;
-    div.innerHTML = `${text}<span class="time">${time}</span>`;
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    socket.emit('getUsers');
   }
 
-  // Рендер контактов
+  // Список пользователей
+  socket.on('userList', (users) => {
+    allUsers = users.filter(u => u.login !== myLogin);
+    renderContacts();
+  });
+
   function renderContacts() {
-    if (!contactsDiv) return;
     contactsDiv.innerHTML = '';
-    allUsers.forEach(name => {
+    allUsers.forEach(user => {
       const div = document.createElement('div');
       div.className = 'contact';
-      const avatar = name.charAt(0).toUpperCase();
+      const avatar = user.name.charAt(0).toUpperCase();
+      const onlineClass = user.online ? 'yes' : 'no';
       div.innerHTML = `
-        <div class="avatar">${avatar}</div>
+        <div class="avatar">
+          ${avatar}
+          <div class="online ${onlineClass}"></div>
+        </div>
         <div class="info">
-          <div class="name">${name}</div>
-          <div class="lastMsg">Нажмите для чата</div>
+          <div class="name">${user.name}</div>
+          <div class="login">@${user.login}</div>
+          <div class="lastMsg">${user.online ? '🟢 онлайн' : '⚪ не в сети'}</div>
         </div>
       `;
-      div.addEventListener('click', () => openChat(name));
+      div.addEventListener('click', () => openChat(user.login));
       contactsDiv.appendChild(div);
     });
   }
 
-  // Открыть диалог
-  function openChat(name) {
-    currentChat = name;
-    contactsDiv.classList.add('hidden');
-    chatWindow.style.display = 'flex';
+  // Открыть чат
+  function openChat(login) {
+    currentChatLogin = login;
+    const user = allUsers.find(u => u.login === login);
+    contactsScreen.classList.remove('active');
+    chatScreen.classList.add('active');
     backBtn.style.display = 'block';
-    headerTitle.textContent = name;
-    headerStatus.textContent = 'личный чат';
+    headerTitle.textContent = user ? user.name : login;
+    headerStatus.textContent = user?.online ? '🟢 онлайн' : '⚪ не в сети';
     messagesDiv.innerHTML = '';
-    socket.emit('getHistory', { withUser: name });
+    socket.emit('getHistory', { withLogin: login });
     input.focus();
   }
 
-  // Назад к контактам
+  // Назад
   backBtn.addEventListener('click', () => {
-    currentChat = '';
-    chatWindow.style.display = 'none';
-    contactsDiv.classList.remove('hidden');
+    currentChatLogin = '';
+    chatScreen.classList.remove('active');
+    contactsScreen.classList.add('active');
     backBtn.style.display = 'none';
     headerTitle.textContent = 'Контакты';
     headerStatus.textContent = '';
   });
 
-  // Отправка сообщения
+  // Меню (сменить имя)
+  menuBtn.addEventListener('click', () => {
+    const newName = prompt('Введите новое отображаемое имя:', myName);
+    if (newName && newName.trim() !== myName) {
+      socket.emit('changeName', { newName: newName.trim() });
+      myName = newName.trim();
+    }
+  });
+
+  // История
+  socket.on('history', ({ withLogin, messages }) => {
+    if (withLogin === currentChatLogin) {
+      messagesDiv.innerHTML = '';
+      messages.forEach(msg => addMessage(msg.from, msg.text, msg.time));
+    }
+  });
+
+  // Новое сообщение
+  socket.on('newPrivateMessage', ({ from, fromName, text, time }) => {
+    if (currentChatLogin === from || currentChatLogin === myLogin) {
+      addMessage(from, text, time);
+    }
+    // Обновляем статус в контактах
+    renderContacts();
+  });
+
+  function addMessage(from, text, time) {
+    const div = document.createElement('div');
+    div.className = `msg ${from === myLogin ? 'me' : 'them'}`;
+    div.innerHTML = `${text}<span class="time">${time}</span>`;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  // Отправка
   btn.addEventListener('click', send);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
 
   function send() {
     const text = input.value.trim();
-    if (!text || !currentChat) return;
-    socket.emit('sendPrivate', { to: currentChat, text });
+    if (!text || !currentChatLogin) return;
+    socket.emit('sendPrivate', { toLogin: currentChatLogin, text });
     input.value = '';
     input.focus();
   }
