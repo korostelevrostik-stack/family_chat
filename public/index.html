@@ -1,39 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="manifest" href="/manifest.json">
   <title>Семейный чат</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body { background: #0b141a; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    #app { width: 100%; max-width: 500px; height: 700px; background: #1e2a32; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.7); }
-    #header { background: #2a3942; padding: 15px; color: white; text-align: center; font-size: 20px; font-weight: bold; border-bottom: 1px solid #3b4a54; }
-    #messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-    .msg { background: #2a3942; padding: 10px 14px; border-radius: 12px; max-width: 80%; color: #e9edef; word-wrap: break-word; }
-    .msg .name { font-weight: bold; color: #00a884; font-size: 14px; }
-    .msg .time { font-size: 11px; color: #8696a0; margin-left: 10px; }
-    .msg.me { align-self: flex-end; background: #005c4b; }
-    #form { display: flex; gap: 8px; padding: 12px; background: #1e2a32; border-top: 1px solid #3b4a54; }
-    #input { flex: 1; padding: 12px; border-radius: 25px; border: none; background: #2a3942; color: white; outline: none; }
-    #input::placeholder { color: #8696a0; }
-    #btn { padding: 12px 20px; border-radius: 25px; border: none; background: #00a884; color: white; font-weight: bold; cursor: pointer; }
-    #login { padding: 20px; display: flex; flex-direction: column; gap: 15px; justify-content: center; height: 100%; }
-    #login input { padding: 14px; border-radius: 12px; border: none; background: #2a3942; color: white; font-size: 16px; }
-    #login button { padding: 14px; border-radius: 12px; border: none; background: #00a884; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    #app { width: 100%; max-width: 500px; height: 700px; background: #0f1419; display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.8); border-radius: 24px; overflow: hidden; }
+    
+    /* Шапка как в Телеге */
+    #header { background: #1f2b33; padding: 15px 20px; color: white; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2b3a45; }
+    #header .avatar { width: 38px; height: 38px; border-radius: 50%; background: #2b5278; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: white; }
+    #header .info { flex: 1; }
+    #header .info .name { font-weight: 600; font-size: 17px; }
+    #header .info .status { font-size: 13px; color: #6b8c9e; }
+    
+    /* Окно сообщений */
+    #messages { flex: 1; padding: 12px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; background: #0f1419; }
+    .msg { max-width: 80%; padding: 7px 12px; border-radius: 12px; font-size: 15px; line-height: 1.4; word-wrap: break-word; position: relative; margin-bottom: 2px; }
+    .msg .name { font-size: 12px; font-weight: 600; color: #6b8c9e; margin-bottom: 2px; display: block; }
+    .msg .time { font-size: 10px; color: #6b8c9e; margin-left: 8px; }
+    .msg.me { align-self: flex-end; background: #2b5278; color: white; border-bottom-right-radius: 4px; }
+    .msg.them { align-self: flex-start; background: #1f2b33; color: #e1e9f0; border-bottom-left-radius: 4px; }
+    .msg .text { display: inline; }
+    
+    /* Панель ввода */
+    #form { display: flex; gap: 8px; padding: 10px 16px; background: #1f2b33; border-top: 1px solid #2b3a45; }
+    #input { flex: 1; padding: 10px 16px; border-radius: 24px; border: none; background: #2b3a45; color: white; font-size: 16px; outline: none; }
+    #input::placeholder { color: #6b8c9e; }
+    #btn { padding: 10px 18px; border-radius: 24px; border: none; background: #2b5278; color: white; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; }
+    #btn:active { transform: scale(0.95); }
+    
+    /* Экран входа */
+    #login { padding: 30px 24px; display: flex; flex-direction: column; gap: 16px; justify-content: center; height: 100%; background: #0f1419; }
+    #login h1 { color: white; font-size: 24px; text-align: center; margin-bottom: 20px; }
+    #login input { padding: 14px 18px; border-radius: 14px; border: none; background: #1f2b33; color: white; font-size: 16px; outline: none; }
+    #login button { padding: 14px; border-radius: 14px; border: none; background: #2b5278; color: white; font-size: 18px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    #login button:active { transform: scale(0.97); }
+    
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 <div id="app">
-  <div id="header">💬 Семейный чат</div>
+  <!-- Шапка -->
+  <div id="header">
+    <div class="avatar" id="avatarIcon">👨‍👩‍👧‍👦</div>
+    <div class="info">
+      <div class="name">Семейный чат</div>
+      <div class="status" id="onlineStatus">онлайн</div>
+    </div>
+  </div>
   
+  <!-- Экран входа -->
   <div id="login">
-    <input id="nameInput" placeholder="Введите ваше имя (например, Папа)" />
-    <button id="joinBtn">Войти в чат</button>
+    <h1>💬 Вход в чат</h1>
+    <input id="nameInput" placeholder="Введите ваше имя" />
+    <button id="joinBtn">Войти</button>
   </div>
 
+  <!-- Чат -->
   <div id="chat" class="hidden" style="flex-direction: column; height: 100%;">
     <div id="messages"></div>
     <div id="form">
@@ -47,6 +75,7 @@
 <script>
   const socket = io();
   let userName = '';
+  const colors = ['#2b5278', '#4a6f8a', '#1f6b4a', '#6b4a7a', '#a67a4a'];
 
   const loginDiv = document.getElementById('login');
   const chatDiv = document.getElementById('chat');
@@ -56,29 +85,44 @@
   const input = document.getElementById('input');
   const btn = document.getElementById('btn');
 
+  function getColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  }
+
   joinBtn.addEventListener('click', () => {
     userName = nameInput.value.trim() || 'Аноним';
     loginDiv.classList.add('hidden');
     chatDiv.classList.remove('hidden');
     chatDiv.style.display = 'flex';
-    document.getElementById('header').textContent = `💬 ${userName}`;
+    document.querySelector('.info .name').textContent = userName;
+    document.querySelector('.info .status').textContent = 'онлайн';
+    document.getElementById('avatarIcon').textContent = userName.charAt(0).toUpperCase();
     input.focus();
   });
 
-  function addMessage(name, text, time) {
+  function addMessage(name, text, time, isMe = false) {
     const div = document.createElement('div');
-    div.className = 'msg' + (name === userName ? ' me' : '');
-    div.innerHTML = `<span class="name">${name}</span> <span class="time">${time}</span><br>${text}`;
+    div.className = `msg ${isMe ? 'me' : 'them'}`;
+    const nameColor = getColor(name);
+    div.innerHTML = `
+      <span class="name" style="color: ${nameColor}">${name}</span>
+      <span class="time">${time}</span>
+      <div class="text">${text}</div>
+    `;
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
   socket.on('history', (data) => {
-    data.forEach(msg => addMessage(msg.name, msg.text, msg.time));
+    data.forEach(msg => addMessage(msg.name, msg.text, msg.time, msg.name === userName));
   });
 
   socket.on('newMessage', (data) => {
-    addMessage(data.name, data.text, data.time);
+    addMessage(data.name, data.text, data.time, data.name === userName);
   });
 
   btn.addEventListener('click', send);
@@ -92,10 +136,8 @@
     input.focus();
   }
 
-  // Регистрация Service Worker для PWA
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('SW зарегистрирован'));
+    navigator.serviceWorker.register('/sw.js');
   }
 </script>
 </body>
