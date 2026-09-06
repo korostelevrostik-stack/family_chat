@@ -2,14 +2,21 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static('public'));
+// === ТОЧНЫЙ ПУТЬ К ПАПКЕ public ===
+app.use(express.static(path.join(__dirname, 'public')));
 
-// === РАБОТА С ФАЙЛОМ db.json (без библиотек) ===
+// === ТЕСТОВЫЙ МАРШРУТ (ПРОВЕРКА, ЧТО СЕРВЕР ЖИВ) ===
+app.get('/ping', (req, res) => {
+  res.send('Сервер жив!');
+});
+
+// === РАБОТА С ФАЙЛОМ db.json ===
 function readDB() {
   try {
     const data = fs.readFileSync('db.json', 'utf8');
@@ -26,7 +33,6 @@ function writeDB(data) {
 io.on('connection', (socket) => {
   console.log('✅ Новое подключение');
 
-  // Регистрация
   socket.on('register', ({ login, password, name }) => {
     const db = readDB();
     if (db.accounts[login]) {
@@ -41,7 +47,6 @@ io.on('connection', (socket) => {
     broadcastUsers();
   });
 
-  // Вход
   socket.on('login', ({ login, password }) => {
     const db = readDB();
     if (!db.accounts[login]) {
@@ -60,7 +65,6 @@ io.on('connection', (socket) => {
     broadcastUsers();
   });
 
-  // Сменить имя
   socket.on('changeName', ({ newName }) => {
     if (!socket.login) return;
     const db = readDB();
@@ -70,7 +74,6 @@ io.on('connection', (socket) => {
     broadcastUsers();
   });
 
-  // Получить список пользователей
   socket.on('getUsers', () => {
     const db = readDB();
     const users = Object.keys(db.accounts).map(login => ({
@@ -81,7 +84,6 @@ io.on('connection', (socket) => {
     socket.emit('userList', users);
   });
 
-  // Получить историю диалога
   socket.on('getHistory', ({ withLogin }) => {
     if (!socket.login) return;
     const db = readDB();
@@ -90,7 +92,6 @@ io.on('connection', (socket) => {
     socket.emit('history', { withLogin, messages: history });
   });
 
-  // Отправить личное сообщение
   socket.on('sendPrivate', ({ toLogin, text }) => {
     if (!socket.login) return;
     const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
@@ -101,7 +102,6 @@ io.on('connection', (socket) => {
     db.messages[key].push({ from: socket.login, text, time });
     writeDB(db);
 
-    // Отправляем получателю
     const recipient = Object.keys(io.sockets.sockets).find(id => {
       return io.sockets.sockets[id].login === toLogin;
     });
@@ -121,7 +121,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Отключение
   socket.on('disconnect', () => {
     if (socket.login) {
       const db = readDB();
