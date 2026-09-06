@@ -1,8 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const { LowSync } = require('lowdb');
-const { JSONFileSync } = require('lowdb');
+const { JSONFileSync } = require('lowdb/node');
 
 const app = express();
 const server = http.createServer(app);
