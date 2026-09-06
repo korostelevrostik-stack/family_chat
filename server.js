@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const { JSONFileSync } = require('lowdb/node');
+const { LowSync, JSONFileSync } = require('lowdb');
 
 const app = express();
 const server = http.createServer(app);
@@ -9,14 +9,16 @@ const io = new Server(server);
 
 app.use(express.static('public'));
 
-// Подключаем базу данных (файл db.json)
+// Настраиваем базу данных
 const adapter = new JSONFileSync('db.json');
 const db = new LowSync(adapter);
 
-// Инициализация базы
+// Инициализируем базу
 db.read();
-db.data ||= { accounts: {}, messages: {} };
-db.write();
+if (!db.data) {
+  db.data = { accounts: {}, messages: {} };
+  db.write();
+}
 
 io.on('connection', (socket) => {
   console.log('✅ Новое подключение');
