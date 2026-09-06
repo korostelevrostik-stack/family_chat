@@ -4,42 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="manifest" href="/manifest.json">
-  <title>Семейный чат</title>
+  <title>Личные чаты</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-    #app { width: 100%; max-width: 500px; height: 700px; background: #0f1419; display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.8); border-radius: 24px; overflow: hidden; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    #app { width: 100%; max-width: 500px; height: 700px; background: #0f1419; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
     
-    /* Шапка как в Телеге */
+    /* Шапка */
     #header { background: #1f2b33; padding: 15px 20px; color: white; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2b3a45; }
-    #header .avatar { width: 38px; height: 38px; border-radius: 50%; background: #2b5278; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: white; }
-    #header .info { flex: 1; }
-    #header .info .name { font-weight: 600; font-size: 17px; }
-    #header .info .status { font-size: 13px; color: #6b8c9e; }
+    #header .back { background: none; border: none; color: #6b8c9e; font-size: 24px; cursor: pointer; padding: 0 8px; display: none; }
+    #header .title { font-weight: 600; font-size: 17px; flex: 1; }
+    #header .status { font-size: 13px; color: #6b8c9e; }
     
-    /* Окно сообщений */
-    #messages { flex: 1; padding: 12px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; background: #0f1419; }
-    .msg { max-width: 80%; padding: 7px 12px; border-radius: 12px; font-size: 15px; line-height: 1.4; word-wrap: break-word; position: relative; margin-bottom: 2px; }
-    .msg .name { font-size: 12px; font-weight: 600; color: #6b8c9e; margin-bottom: 2px; display: block; }
-    .msg .time { font-size: 10px; color: #6b8c9e; margin-left: 8px; }
+    /* Список контактов */
+    #contacts { flex: 1; padding: 12px 0; overflow-y: auto; }
+    .contact { padding: 14px 20px; border-bottom: 1px solid #1f2b33; color: white; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.15s; }
+    .contact:active { background: #1f2b33; }
+    .contact .avatar { width: 44px; height: 44px; border-radius: 50%; background: #2b5278; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: white; }
+    .contact .info { flex: 1; }
+    .contact .info .name { font-weight: 500; font-size: 16px; }
+    .contact .info .lastMsg { font-size: 13px; color: #6b8c9e; margin-top: 2px; }
+    
+    /* Окно чата (скрыто) */
+    #chatWindow { display: none; flex-direction: column; height: 100%; }
+    #messages { flex: 1; padding: 12px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .msg { max-width: 80%; padding: 7px 12px; border-radius: 12px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
     .msg.me { align-self: flex-end; background: #2b5278; color: white; border-bottom-right-radius: 4px; }
     .msg.them { align-self: flex-start; background: #1f2b33; color: #e1e9f0; border-bottom-left-radius: 4px; }
-    .msg .text { display: inline; }
+    .msg .time { font-size: 10px; color: #6b8c9e; display: block; text-align: right; margin-top: 2px; }
     
-    /* Панель ввода */
     #form { display: flex; gap: 8px; padding: 10px 16px; background: #1f2b33; border-top: 1px solid #2b3a45; }
     #input { flex: 1; padding: 10px 16px; border-radius: 24px; border: none; background: #2b3a45; color: white; font-size: 16px; outline: none; }
     #input::placeholder { color: #6b8c9e; }
-    #btn { padding: 10px 18px; border-radius: 24px; border: none; background: #2b5278; color: white; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; }
-    #btn:active { transform: scale(0.95); }
+    #btn { padding: 10px 18px; border-radius: 24px; border: none; background: #2b5278; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
     
-    /* Экран входа */
     #login { padding: 30px 24px; display: flex; flex-direction: column; gap: 16px; justify-content: center; height: 100%; background: #0f1419; }
-    #login h1 { color: white; font-size: 24px; text-align: center; margin-bottom: 20px; }
+    #login h1 { color: white; font-size: 24px; text-align: center; }
     #login input { padding: 14px 18px; border-radius: 14px; border: none; background: #1f2b33; color: white; font-size: 16px; outline: none; }
-    #login button { padding: 14px; border-radius: 14px; border: none; background: #2b5278; color: white; font-size: 18px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    #login button:active { transform: scale(0.97); }
-    
+    #login button { padding: 14px; border-radius: 14px; border: none; background: #2b5278; color: white; font-size: 18px; font-weight: 600; cursor: pointer; }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -47,13 +49,11 @@
 <div id="app">
   <!-- Шапка -->
   <div id="header">
-    <div class="avatar" id="avatarIcon">👨‍👩‍👧‍👦</div>
-    <div class="info">
-      <div class="name">Семейный чат</div>
-      <div class="status" id="onlineStatus">онлайн</div>
-    </div>
+    <button class="back" id="backBtn">←</button>
+    <div class="title" id="headerTitle">Контакты</div>
+    <div class="status" id="headerStatus"></div>
   </div>
-  
+
   <!-- Экран входа -->
   <div id="login">
     <h1>💬 Вход в чат</h1>
@@ -61,8 +61,11 @@
     <button id="joinBtn">Войти</button>
   </div>
 
-  <!-- Чат -->
-  <div id="chat" class="hidden" style="flex-direction: column; height: 100%;">
+  <!-- Список контактов -->
+  <div id="contacts" class="hidden"></div>
+
+  <!-- Окно чата -->
+  <div id="chatWindow">
     <div id="messages"></div>
     <div id="form">
       <input id="input" placeholder="Сообщение..." />
@@ -74,70 +77,127 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
-  let userName = '';
-  const colors = ['#2b5278', '#4a6f8a', '#1f6b4a', '#6b4a7a', '#a67a4a'];
+  let myName = '';
+  let currentChat = '';
+  let allUsers = [];
 
   const loginDiv = document.getElementById('login');
-  const chatDiv = document.getElementById('chat');
-  const nameInput = document.getElementById('nameInput');
-  const joinBtn = document.getElementById('joinBtn');
+  const contactsDiv = document.getElementById('contacts');
+  const chatWindow = document.getElementById('chatWindow');
   const messagesDiv = document.getElementById('messages');
   const input = document.getElementById('input');
   const btn = document.getElementById('btn');
+  const nameInput = document.getElementById('nameInput');
+  const joinBtn = document.getElementById('joinBtn');
+  const backBtn = document.getElementById('backBtn');
+  const headerTitle = document.getElementById('headerTitle');
+  const headerStatus = document.getElementById('headerStatus');
 
-  function getColor(name) {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
-  }
-
+  // Вход
   joinBtn.addEventListener('click', () => {
-    userName = nameInput.value.trim() || 'Аноним';
+    myName = nameInput.value.trim() || 'Аноним';
     loginDiv.classList.add('hidden');
-    chatDiv.classList.remove('hidden');
-    chatDiv.style.display = 'flex';
-    document.querySelector('.info .name').textContent = userName;
-    document.querySelector('.info .status').textContent = 'онлайн';
-    document.getElementById('avatarIcon').textContent = userName.charAt(0).toUpperCase();
-    input.focus();
+    contactsDiv.classList.remove('hidden');
+    socket.emit('register', myName);
+    headerTitle.textContent = 'Контакты';
   });
 
-  function addMessage(name, text, time, isMe = false) {
+  // Обновление списка пользователей
+  socket.on('userList', (users) => {
+    allUsers = users.filter(u => u !== myName);
+    renderContacts();
+  });
+
+  socket.on('userJoined', (name) => {
+    if (!allUsers.includes(name) && name !== myName) {
+      allUsers.push(name);
+      renderContacts();
+    }
+  });
+
+  socket.on('userLeft', (name) => {
+    allUsers = allUsers.filter(u => u !== name);
+    renderContacts();
+  });
+
+  // История сообщений
+  socket.on('history', ({ withUser, messages }) => {
+    if (withUser === currentChat) {
+      messagesDiv.innerHTML = '';
+      messages.forEach(msg => addMessage(msg.from, msg.text, msg.time));
+    }
+  });
+
+  // Новое личное сообщение
+  socket.on('newPrivateMessage', ({ from, text, time }) => {
+    if (currentChat === from || currentChat === myName) {
+      addMessage(from, text, time);
+    }
+    // Обновляем последнее сообщение в контактах
+    renderContacts();
+  });
+
+  function addMessage(from, text, time) {
     const div = document.createElement('div');
-    div.className = `msg ${isMe ? 'me' : 'them'}`;
-    const nameColor = getColor(name);
-    div.innerHTML = `
-      <span class="name" style="color: ${nameColor}">${name}</span>
-      <span class="time">${time}</span>
-      <div class="text">${text}</div>
-    `;
+    div.className = `msg ${from === myName ? 'me' : 'them'}`;
+    div.innerHTML = `${text}<span class="time">${time}</span>`;
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
-  socket.on('history', (data) => {
-    data.forEach(msg => addMessage(msg.name, msg.text, msg.time, msg.name === userName));
+  // Рендер контактов
+  function renderContacts() {
+    if (!contactsDiv) return;
+    contactsDiv.innerHTML = '';
+    allUsers.forEach(name => {
+      const div = document.createElement('div');
+      div.className = 'contact';
+      const avatar = name.charAt(0).toUpperCase();
+      div.innerHTML = `
+        <div class="avatar">${avatar}</div>
+        <div class="info">
+          <div class="name">${name}</div>
+          <div class="lastMsg">Нажмите для чата</div>
+        </div>
+      `;
+      div.addEventListener('click', () => openChat(name));
+      contactsDiv.appendChild(div);
+    });
+  }
+
+  // Открыть диалог
+  function openChat(name) {
+    currentChat = name;
+    contactsDiv.classList.add('hidden');
+    chatWindow.style.display = 'flex';
+    backBtn.style.display = 'block';
+    headerTitle.textContent = name;
+    headerStatus.textContent = 'личный чат';
+    messagesDiv.innerHTML = '';
+    socket.emit('getHistory', { withUser: name });
+    input.focus();
+  }
+
+  // Назад к контактам
+  backBtn.addEventListener('click', () => {
+    currentChat = '';
+    chatWindow.style.display = 'none';
+    contactsDiv.classList.remove('hidden');
+    backBtn.style.display = 'none';
+    headerTitle.textContent = 'Контакты';
+    headerStatus.textContent = '';
   });
 
-  socket.on('newMessage', (data) => {
-    addMessage(data.name, data.text, data.time, data.name === userName);
-  });
-
+  // Отправка сообщения
   btn.addEventListener('click', send);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
 
   function send() {
     const text = input.value.trim();
-    if (!text || !userName) return;
-    socket.emit('sendMessage', { name: userName, text });
+    if (!text || !currentChat) return;
+    socket.emit('sendPrivate', { to: currentChat, text });
     input.value = '';
     input.focus();
-  }
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
   }
 </script>
 </body>
