@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const { LowSync, JSONFileSync } = require('lowdb');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -9,15 +9,18 @@ const io = new Server(server);
 
 app.use(express.static('public'));
 
-// Настраиваем базу данных
-const adapter = new JSONFileSync('db.json');
-const db = new LowSync(adapter);
+// === РАБОТА С ФАЙЛОМ db.json (без библиотек) ===
+function readDB() {
+  try {
+    const data = fs.readFileSync('db.json', 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    return { accounts: {}, messages: {} };
+  }
+}
 
-// Инициализируем базу
-db.read();
-if (!db.data) {
-  db.data = { accounts: {}, messages: {} };
-  db.write();
+function writeDB(data) {
+  fs.writeFileSync('db.json', JSON.stringify(data, null, 2));
 }
 
 io.on('connection', (socket) => {
@@ -25,13 +28,13 @@ io.on('connection', (socket) => {
 
   // Регистрация
   socket.on('register', ({ login, password, name }) => {
-    db.read();
-    if (db.data.accounts[login]) {
+    const db = readDB();
+    if (db.accounts[login]) {
       socket.emit('registerError', 'Логин уже занят!');
       return;
     }
-    db.data.accounts[login] = { name, password, online: true };
-    db.write();
+    db.accounts[login] = { name, password, online: true };
+    writeDB(db);
     socket.login = login;
     socket.name = name;
     socket.emit('registerSuccess', { login, name });
@@ -40,40 +43,40 @@ io.on('connection', (socket) => {
 
   // Вход
   socket.on('login', ({ login, password }) => {
-    db.read();
-    if (!db.data.accounts[login]) {
+    const db = readDB();
+    if (!db.accounts[login]) {
       socket.emit('loginError', 'Аккаунт не найден!');
       return;
     }
-    if (db.data.accounts[login].password !== password) {
+    if (db.accounts[login].password !== password) {
       socket.emit('loginError', 'Неверный пароль!');
       return;
     }
     socket.login = login;
-    socket.name = db.data.accounts[login].name;
-    db.data.accounts[login].online = true;
-    db.write();
-    socket.emit('loginSuccess', { login, name: db.data.accounts[login].name });
+    socket.name = db.accounts[login].name;
+    db.accounts[login].online = true;
+    writeDB(db);
+    socket.emit('loginSuccess', { login, name: db.accounts[login].name });
     broadcastUsers();
   });
 
   // Сменить имя
   socket.on('changeName', ({ newName }) => {
     if (!socket.login) return;
-    db.read();
-    db.data.accounts[socket.login].name = newName;
+    const db = readDB();
+    db.accounts[socket.login].name = newName;
     socket.name = newName;
-    db.write();
+    writeDB(db);
     broadcastUsers();
   });
 
   // Получить список пользователей
   socket.on('getUsers', () => {
-    db.read();
-    const users = Object.keys(db.data.accounts).map(login => ({
+    const db = readDB();
+    const users = Object.keys(db.accounts).map(login => ({
       login,
-      name: db.data.accounts[login].name,
-      online: db.data.accounts[login].online
+      name: db.accounts[login].name,
+      online: db.accounts[login].online
     }));
     socket.emit('userList', users);
   });
@@ -81,9 +84,9 @@ io.on('connection', (socket) => {
   // Получить историю диалога
   socket.on('getHistory', ({ withLogin }) => {
     if (!socket.login) return;
-    db.read();
+    const db = readDB();
     const key = [socket.login, withLogin].sort().join('-');
-    const history = db.data.messages[key] || [];
+    const history = db.messages[key] || [];
     socket.emit('history', { withLogin, messages: history });
   });
 
@@ -93,10 +96,10 @@ io.on('connection', (socket) => {
     const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     const key = [socket.login, toLogin].sort().join('-');
     
-    db.read();
-    if (!db.data.messages[key]) db.data.messages[key] = [];
-    db.data.messages[key].push({ from: socket.login, text, time });
-    db.write();
+    const db = readDB();
+    if (!db.messages[key]) db.messages[key] = [];
+    db.messages[key].push({ from: socket.login, text, time });
+    writeDB(db);
 
     // Отправляем получателю
     const recipient = Object.keys(io.sockets.sockets).find(id => {
@@ -121,19 +124,21 @@ io.on('connection', (socket) => {
   // Отключение
   socket.on('disconnect', () => {
     if (socket.login) {
-      db.read();
-      db.data.accounts[socket.login].online = false;
-      db.write();
+      const db = readDB();
+      if (db.accounts[socket.login]) {
+        db.accounts[socket.login].online = false;
+        writeDB(db);
+      }
       broadcastUsers();
     }
   });
 
   function broadcastUsers() {
-    db.read();
-    const users = Object.keys(db.data.accounts).map(login => ({
+    const db = readDB();
+    const users = Object.keys(db.accounts).map(login => ({
       login,
-      name: db.data.accounts[login].name,
-      online: db.data.accounts[login].online
+      name: db.accounts[login].name,
+      online: db.accounts[login].online
     }));
     io.emit('userList', users);
   }
