@@ -8,15 +8,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// === ТОЧНЫЙ ПУТЬ К ПАПКЕ public ===
 app.use(express.static(path.join(__dirname, 'public')));
 
-// === ТЕСТОВЫЙ МАРШРУТ (ПРОВЕРКА, ЧТО СЕРВЕР ЖИВ) ===
-app.get('/ping', (req, res) => {
-  res.send('Сервер жив!');
-});
-
-// === РАБОТА С ФАЙЛОМ db.json ===
 function readDB() {
   try {
     const data = fs.readFileSync('db.json', 'utf8');
