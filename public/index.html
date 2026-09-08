@@ -3,113 +3,374 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="manifest" href="/manifest.json">
-  <title>Мессенджер</title>
+  <title>Семейный чат</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    #app { width: 100%; max-width: 500px; height: 700px; background: #0f1419; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+    /* ===== ОБЩИЕ СТИЛИ ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
     
-    #header { background: #1f2b33; padding: 15px 20px; color: white; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2b3a45; }
-    #header .back { background: none; border: none; color: #6b8c9e; font-size: 24px; cursor: pointer; padding: 0 8px; display: none; }
-    #header .title { font-weight: 600; font-size: 17px; flex: 1; }
-    #header .status { font-size: 13px; color: #6b8c9e; }
-    #header .menu { background: none; border: none; color: #6b8c9e; font-size: 20px; cursor: pointer; }
+    #app {
+      width: 100%;
+      max-width: 500px;
+      height: 700px;
+      background: #0f1419;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(0,0,0,0.8);
+      border-radius: 24px;
+    }
 
-    .screen { display: none; flex-direction: column; height: 100%; }
-    .screen.active { display: flex; }
+    /* ===== ШАПКА ===== */
+    #header {
+      background: #1f2b33;
+      padding: 12px 16px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #2b3a45;
+      min-height: 60px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    #header .back {
+      background: none;
+      border: none;
+      color: #6b8c9e;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 8px;
+      display: none;
+      line-height: 1;
+    }
+    #header .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #2b5278;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+      color: white;
+      flex-shrink: 0;
+    }
+    #header .info {
+      flex: 1;
+      overflow: hidden;
+    }
+    #header .info .name {
+      font-weight: 600;
+      font-size: 17px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #header .info .status {
+      font-size: 13px;
+      color: #6b8c9e;
+    }
+    #header .menu-btn {
+      background: none;
+      border: none;
+      color: #6b8c9e;
+      font-size: 22px;
+      cursor: pointer;
+      padding: 0 4px;
+    }
 
-    #loginScreen { justify-content: center; padding: 30px 24px; background: #0f1419; }
-    #loginScreen h1 { color: white; font-size: 24px; text-align: center; margin-bottom: 20px; }
-    #loginScreen input { padding: 14px 18px; border-radius: 14px; border: none; background: #1f2b33; color: white; font-size: 16px; outline: none; margin-bottom: 10px; }
-    #loginScreen button { padding: 14px; border-radius: 14px; border: none; background: #2b5278; color: white; font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 8px; }
-    #loginScreen .switch { color: #6b8c9e; text-align: center; margin-top: 12px; font-size: 14px; }
-    #loginScreen .switch span { color: #2b5278; font-weight: 600; cursor: pointer; }
-    .error { color: #ff6b6b; font-size: 14px; text-align: center; margin-top: 8px; }
+    /* ===== ЭКРАН ВХОДА ===== */
+    #loginScreen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 30px 24px;
+      height: 100%;
+      background: #0f1419;
+    }
+    #loginScreen h1 {
+      color: white;
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #loginScreen input {
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: none;
+      background: #1f2b33;
+      color: white;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    #loginScreen input::placeholder { color: #6b8c9e; }
+    #loginScreen button {
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      background: #2b5278;
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    #loginScreen .switch {
+      color: #6b8c9e;
+      text-align: center;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    #loginScreen .switch span {
+      color: #2b5278;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #loginScreen .error {
+      color: #ff6b6b;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 8px;
+    }
 
-    #contacts { flex: 1; padding: 12px 0; overflow-y: auto; }
-    .contact { padding: 14px 20px; border-bottom: 1px solid #1f2b33; color: white; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.15s; }
-    .contact:active { background: #1f2b33; }
-    .contact .avatar { width: 44px; height: 44px; border-radius: 50%; background: #2b5278; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: white; position: relative; }
-    .contact .avatar .online { position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #0f1419; }
-    .contact .avatar .online.yes { background: #2b9b5e; }
-    .contact .avatar .online.no { background: #6b8c9e; }
-    .contact .info { flex: 1; }
-    .contact .info .name { font-weight: 500; font-size: 16px; }
-    .contact .info .login { font-size: 12px; color: #6b8c9e; }
-    .contact .info .lastMsg { font-size: 13px; color: #6b8c9e; margin-top: 2px; }
+    /* ===== ЭКРАН КОНТАКТОВ (СПИСОК) ===== */
+    #contactsScreen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      background: #0f1419;
+    }
+    #contactsScreen.active {
+      display: flex;
+    }
+    #contactsList {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+    .contact-item {
+      padding: 12px 20px;
+      border-bottom: 1px solid #1f2b33;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .contact-item:active {
+      background: #1f2b33;
+    }
+    .contact-item .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #2b5278;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 20px;
+      color: white;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .contact-item .avatar .online {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #0f1419;
+    }
+    .contact-item .avatar .online.on { background: #2b9b5e; }
+    .contact-item .avatar .online.off { background: #6b8c9e; }
+    .contact-item .info {
+      flex: 1;
+      min-width: 0;
+    }
+    .contact-item .info .name {
+      font-weight: 500;
+      font-size: 16px;
+    }
+    .contact-item .info .last-msg {
+      font-size: 13px;
+      color: #6b8c9e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-    #chatWindow .messages { flex: 1; padding: 12px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-    .msg { max-width: 80%; padding: 7px 12px; border-radius: 12px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
-    .msg.me { align-self: flex-end; background: #2b5278; color: white; border-bottom-right-radius: 4px; }
-    .msg.them { align-self: flex-start; background: #1f2b33; color: #e1e9f0; border-bottom-left-radius: 4px; }
-    .msg .time { font-size: 10px; color: #6b8c9e; display: block; text-align: right; margin-top: 2px; }
+    /* ===== ЭКРАН ЧАТА (ПОЛНОЭКРАННЫЙ) ===== */
+    #chatScreen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      background: #0f1419;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      background: #0f1419;
+    }
+    #chatScreen.active {
+      display: flex;
+    }
+    #messagesContainer {
+      flex: 1;
+      padding: 12px 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #0f1419;
+    }
+    .msg {
+      max-width: 80%;
+      padding: 8px 14px;
+      border-radius: 14px;
+      font-size: 15px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      margin-bottom: 2px;
+    }
+    .msg.me {
+      align-self: flex-end;
+      background: #2b5278;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.them {
+      align-self: flex-start;
+      background: #1f2b33;
+      color: #e1e9f0;
+      border-bottom-left-radius: 4px;
+    }
+    .msg .time {
+      font-size: 10px;
+      color: #6b8c9e;
+      display: block;
+      text-align: right;
+      margin-top: 2px;
+    }
 
-    #form { display: flex; gap: 8px; padding: 10px 16px; background: #1f2b33; border-top: 1px solid #2b3a45; }
-    #input { flex: 1; padding: 10px 16px; border-radius: 24px; border: none; background: #2b3a45; color: white; font-size: 16px; outline: none; }
-    #input::placeholder { color: #6b8c9e; }
-    #btn { padding: 10px 18px; border-radius: 24px; border: none; background: #2b5278; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
+    /* ===== ПАНЕЛЬ ВВОДА ===== */
+    #inputArea {
+      display: flex;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #1f2b33;
+      border-top: 1px solid #2b3a45;
+      flex-shrink: 0;
+    }
+    #inputArea input {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: 24px;
+      border: none;
+      background: #2b3a45;
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+    #inputArea input::placeholder {
+      color: #6b8c9e;
+    }
+    #inputArea button {
+      padding: 10px 18px;
+      border-radius: 24px;
+      border: none;
+      background: #2b5278;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    #inputArea button:active {
+      transform: scale(0.95);
+    }
 
+    /* ===== УТИЛИТЫ ===== */
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 <div id="app">
-  <!-- Шапка -->
+
+  <!-- ===== ШАПКА ===== -->
   <div id="header">
     <button class="back" id="backBtn">←</button>
-    <div class="title" id="headerTitle">Контакты</div>
-    <div class="status" id="headerStatus"></div>
-    <button class="menu" id="menuBtn">⚙️</button>
+    <div class="avatar" id="headerAvatar">👤</div>
+    <div class="info">
+      <div class="name" id="headerName">Семейный чат</div>
+      <div class="status" id="headerStatus">онлайн</div>
+    </div>
+    <button class="menu-btn" id="menuBtn">⚙️</button>
   </div>
 
-  <!-- Экран входа/регистрации -->
-  <div id="loginScreen" class="screen active">
+  <!-- ===== ЭКРАН ВХОДА ===== -->
+  <div id="loginScreen">
     <h1 id="authTitle">💬 Вход</h1>
     <input id="loginInput" placeholder="Логин (например, papa)" />
     <input id="passInput" type="password" placeholder="Пароль" />
-    <input id="nameInput" placeholder="Отображаемое имя (например, Папа)" style="display: none;" />
+    <input id="nameInput" placeholder="Отображаемое имя (например, Папа)" style="display:none;" />
     <button id="authBtn">Войти</button>
     <div class="switch" id="authSwitch">Нет аккаунта? <span>Зарегистрироваться</span></div>
     <div class="error" id="authError"></div>
   </div>
 
-  <!-- Список контактов -->
-  <div id="contactsScreen" class="screen">
-    <div id="contacts"></div>
+  <!-- ===== ЭКРАН КОНТАКТОВ ===== -->
+  <div id="contactsScreen" class="active">
+    <div id="contactsList"></div>
   </div>
 
-  <!-- Окно чата -->
-  <div id="chatScreen" class="screen">
-    <div class="messages" id="messages"></div>
-    <div id="form">
-      <input id="input" placeholder="Сообщение..." />
-      <button id="btn">➤</button>
+  <!-- ===== ЭКРАН ЧАТА (ПОЛНОЭКРАННЫЙ) ===== -->
+  <div id="chatScreen">
+    <div id="messagesContainer"></div>
+    <div id="inputArea">
+      <input id="msgInput" placeholder="Сообщение..." />
+      <button id="sendBtn">➤</button>
     </div>
   </div>
+
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+  // ============================================================
+  //  КОД КЛИЕНТА
+  // ============================================================
+
   const socket = io();
+
+  // ===== СОСТОЯНИЕ =====
   let myLogin = '';
   let myName = '';
   let currentChatLogin = '';
-  let isRegister = false;
+  let isRegisterMode = false;
   let allUsers = [];
 
-  // DOM
+  // ===== DOM-ЭЛЕМЕНТЫ =====
   const loginScreen = document.getElementById('loginScreen');
   const contactsScreen = document.getElementById('contactsScreen');
   const chatScreen = document.getElementById('chatScreen');
-  const contactsDiv = document.getElementById('contacts');
-  const messagesDiv = document.getElementById('messages');
-  const input = document.getElementById('input');
-  const btn = document.getElementById('btn');
+  const contactsList = document.getElementById('contactsList');
+  const messagesContainer = document.getElementById('messagesContainer');
+  const msgInput = document.getElementById('msgInput');
+  const sendBtn = document.getElementById('sendBtn');
   const backBtn = document.getElementById('backBtn');
   const menuBtn = document.getElementById('menuBtn');
-  const headerTitle = document.getElementById('headerTitle');
+  const headerName = document.getElementById('headerName');
   const headerStatus = document.getElementById('headerStatus');
+  const headerAvatar = document.getElementById('headerAvatar');
 
   const loginInput = document.getElementById('loginInput');
   const passInput = document.getElementById('passInput');
@@ -119,10 +380,10 @@
   const authError = document.getElementById('authError');
   const authSwitch = document.getElementById('authSwitch');
 
-  // Переключение между входом и регистрацией
+  // ===== ПЕРЕКЛЮЧЕНИЕ ВХОД/РЕГИСТРАЦИЯ =====
   authSwitch.addEventListener('click', () => {
-    isRegister = !isRegister;
-    if (isRegister) {
+    isRegisterMode = !isRegisterMode;
+    if (isRegisterMode) {
       authTitle.textContent = '📝 Регистрация';
       authBtn.textContent = 'Зарегистрироваться';
       authSwitch.innerHTML = 'Уже есть аккаунт? <span>Войти</span>';
@@ -136,13 +397,15 @@
     authError.textContent = '';
   });
 
-  // Авторизация
+  // ===== АВТОРИЗАЦИЯ =====
   authBtn.addEventListener('click', () => {
     const login = loginInput.value.trim();
     const password = passInput.value.trim();
-    if (!login || !password) { authError.textContent = 'Заполните все поля!'; return; }
-
-    if (isRegister) {
+    if (!login || !password) {
+      authError.textContent = 'Заполните все поля!';
+      return;
+    }
+    if (isRegisterMode) {
       const name = nameInput.value.trim() || login;
       socket.emit('register', { login, password, name });
     } else {
@@ -150,84 +413,104 @@
     }
   });
 
-  // Ответы сервера
+  // ===== ОТВЕТЫ СЕРВЕРА =====
   socket.on('registerSuccess', (data) => {
     myLogin = data.login;
     myName = data.name;
     enterApp();
   });
-
   socket.on('registerError', (msg) => { authError.textContent = msg; });
-
   socket.on('loginSuccess', (data) => {
     myLogin = data.login;
     myName = data.name;
     enterApp();
   });
-
   socket.on('loginError', (msg) => { authError.textContent = msg; });
 
   function enterApp() {
-    loginScreen.classList.remove('active');
+    loginScreen.style.display = 'none';
     contactsScreen.classList.add('active');
-    headerTitle.textContent = 'Контакты';
+    chatScreen.classList.remove('active');
+    headerName.textContent = 'Контакты';
+    headerStatus.textContent = '';
+    headerAvatar.textContent = '👤';
+    backBtn.style.display = 'none';
     socket.emit('getUsers');
   }
 
-  // Список пользователей
+  // ===== СПИСОК ПОЛЬЗОВАТЕЛЕЙ =====
   socket.on('userList', (users) => {
     allUsers = users.filter(u => u.login !== myLogin);
     renderContacts();
   });
 
+  socket.on('userJoined', (name) => {
+    if (!allUsers.find(u => u.login === name) && name !== myLogin) {
+      allUsers.push({ login: name, name, online: true });
+      renderContacts();
+    }
+  });
+
+  socket.on('userLeft', (login) => {
+    const user = allUsers.find(u => u.login === login);
+    if (user) user.online = false;
+    renderContacts();
+  });
+
   function renderContacts() {
-    contactsDiv.innerHTML = '';
+    if (!contactsList) return;
+    contactsList.innerHTML = '';
+    if (allUsers.length === 0) {
+      contactsList.innerHTML = `<div style="color:#6b8c9e;text-align:center;padding:40px 20px;">Нет контактов.<br>Пригласите родных!</div>`;
+      return;
+    }
     allUsers.forEach(user => {
       const div = document.createElement('div');
-      div.className = 'contact';
-      const avatar = user.name.charAt(0).toUpperCase();
-      const onlineClass = user.online ? 'yes' : 'no';
+      div.className = 'contact-item';
+      const avatarLetter = user.name.charAt(0).toUpperCase();
+      const onlineClass = user.online ? 'on' : 'off';
       div.innerHTML = `
         <div class="avatar">
-          ${avatar}
+          ${avatarLetter}
           <div class="online ${onlineClass}"></div>
         </div>
         <div class="info">
           <div class="name">${user.name}</div>
-          <div class="login">@${user.login}</div>
-          <div class="lastMsg">${user.online ? '🟢 онлайн' : '⚪ не в сети'}</div>
+          <div class="last-msg">${user.online ? '🟢 онлайн' : '⚪ не в сети'}</div>
         </div>
       `;
       div.addEventListener('click', () => openChat(user.login));
-      contactsDiv.appendChild(div);
+      contactsList.appendChild(div);
     });
   }
 
-  // Открыть чат
+  // ===== ОТКРЫТЬ ЧАТ (ПОЛНОЭКРАННО) =====
   function openChat(login) {
     currentChatLogin = login;
     const user = allUsers.find(u => u.login === login);
     contactsScreen.classList.remove('active');
     chatScreen.classList.add('active');
     backBtn.style.display = 'block';
-    headerTitle.textContent = user ? user.name : login;
+    headerName.textContent = user ? user.name : login;
     headerStatus.textContent = user?.online ? '🟢 онлайн' : '⚪ не в сети';
-    messagesDiv.innerHTML = '';
+    headerAvatar.textContent = user ? user.name.charAt(0).toUpperCase() : '👤';
+    messagesContainer.innerHTML = '';
     socket.emit('getHistory', { withLogin: login });
-    input.focus();
+    msgInput.focus();
   }
 
-  // Назад
+  // ===== НАЗАД К КОНТАКТАМ =====
   backBtn.addEventListener('click', () => {
     currentChatLogin = '';
     chatScreen.classList.remove('active');
     contactsScreen.classList.add('active');
     backBtn.style.display = 'none';
-    headerTitle.textContent = 'Контакты';
+    headerName.textContent = 'Контакты';
     headerStatus.textContent = '';
+    headerAvatar.textContent = '👤';
   });
 
-  // Меню (сменить имя)
+  // ===== МЕНЮ (СМЕНА ИМЕНИ) =====
   menuBtn.addEventListener('click', () => {
     const newName = prompt('Введите новое отображаемое имя:', myName);
     if (newName && newName.trim() !== myName) {
@@ -236,15 +519,15 @@
     }
   });
 
-  // История
+  // ===== ИСТОРИЯ СООБЩЕНИЙ =====
   socket.on('history', ({ withLogin, messages }) => {
     if (withLogin === currentChatLogin) {
-      messagesDiv.innerHTML = '';
+      messagesContainer.innerHTML = '';
       messages.forEach(msg => addMessage(msg.from, msg.text, msg.time));
     }
   });
 
-  // Новое сообщение
+  // ===== НОВОЕ СООБЩЕНИЕ =====
   socket.on('newPrivateMessage', ({ from, fromName, text, time }) => {
     if (currentChatLogin === from || currentChatLogin === myLogin) {
       addMessage(from, text, time);
@@ -257,21 +540,27 @@
     const div = document.createElement('div');
     div.className = `msg ${from === myLogin ? 'me' : 'them'}`;
     div.innerHTML = `${text}<span class="time">${time}</span>`;
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    messagesContainer.appendChild(div);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
-  // Отправка
-  btn.addEventListener('click', send);
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+  // ===== ОТПРАВКА СООБЩЕНИЯ =====
+  sendBtn.addEventListener('click', sendMessage);
+  msgInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
 
-  function send() {
-    const text = input.value.trim();
+  function sendMessage() {
+    const text = msgInput.value.trim();
     if (!text || !currentChatLogin) return;
     socket.emit('sendPrivate', { toLogin: currentChatLogin, text });
-    input.value = '';
-    input.focus();
+    msgInput.value = '';
+    msgInput.focus();
   }
+
+  // ===== ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ =====
+  // Инициализация
+  loginScreen.style.display = 'flex';
 </script>
 </body>
 </html>
